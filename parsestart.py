@@ -1,4 +1,5 @@
 import os
+import argparse
 
 def parse_srt(srt_file):
     # Open the srt file
@@ -46,8 +47,14 @@ def parse_srt(srt_file):
     # Close the last output file
     output_file.close()
 
-# Call the function to parse the srt file
-parse_srt('source.srt')
+# Create the parser
+parser = argparse.ArgumentParser(description="Parse an SRT file")
 
-# Print a success message
-print("The srt file was successfully parsed and the text was written to the output files.")
+# Add the arguments
+parser.add_argument('Path', metavar='path', type=str, help='the path to the srt file')
+
+# Execute the parse_args() method
+args = parser.parse_args()
+
+# Call the function to parse the srt file
+parse_srt(args.Path)
