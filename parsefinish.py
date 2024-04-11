@@ -21,21 +21,27 @@ def merge_srt_and_translation(srt_file, txt_file, output_file):
         if srt_line.isdigit() and srt_line == txt_line:
             output_lines.append(srt_lines[srt_index])  # Add the number
             output_lines.append(srt_lines[srt_index + 1])  # Add the timestamp
-            output_lines.append(srt_lines[srt_index + 2])  # Add the original text
-            output_lines.append(txt_lines[txt_index + 1] + '\n')  # Add the translated text
-            output_lines.append('\n')  # Add an empty line
 
-            # Move to the next subtitle in both files
-            srt_index += 4
-            txt_index += 3
+            # Add the original text
+            srt_index += 2
+            while srt_index < len(srt_lines) and not (srt_lines[srt_index].strip().isdigit() or srt_lines[srt_index].strip() == ''):
+                output_lines.append(srt_lines[srt_index])
+                srt_index += 1
+
+            # Add the translated text
+            txt_index += 1
+            while txt_index < len(txt_lines) and not txt_lines[txt_index].strip().isdigit():
+                output_lines.append(txt_lines[txt_index])
+                txt_index += 1
+
+            output_lines.append('\n')  # Add an empty line
         else:
             # If the numbers don't match, move to the next subtitle in the srt file
-            srt_index += 4
+            srt_index += 1
 
     # Write the output lines to the output file
     with open(output_file, 'w') as out:
         out.writelines(output_lines)
-
 
 def create_translated_srt(srt_file, txt_file, output_file):
     # Open the srt and txt files
@@ -57,20 +63,24 @@ def create_translated_srt(srt_file, txt_file, output_file):
         if srt_line.isdigit() and srt_line == txt_line:
             output_lines.append(srt_lines[srt_index])  # Add the number
             output_lines.append(srt_lines[srt_index + 1])  # Add the timestamp
-            output_lines.append(txt_lines[txt_index + 1] + '\n')  # Add the translated text
+
+            # Add the translated text
+            txt_index += 1
+            while txt_index < len(txt_lines) and not txt_lines[txt_index].strip().isdigit():
+                output_lines.append(txt_lines[txt_index])
+                txt_index += 1
+
             output_lines.append('\n')  # Add an empty line
 
-            # Move to the next subtitle in both files
+            # Move to the next subtitle in the srt file
             srt_index += 4
-            txt_index += 3
         else:
             # If the numbers don't match, move to the next subtitle in the srt file
-            srt_index += 4
+            srt_index += 1
 
     # Write the output lines to the output file
     with open(output_file, 'w') as out:
         out.writelines(output_lines)
-
 
 # Get the source srt filename from the command line
 srt_file = sys.argv[1]
