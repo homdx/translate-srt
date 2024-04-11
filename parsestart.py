@@ -18,27 +18,26 @@ def parse_srt(srt_file):
         
         # If the line is a number, add it to text_lines and set write_text to True
         if stripped_line.isdigit():
+            # Calculate the size of the text lines
+            text_size = sum(len(text) for text in text_lines)
+
+            # If the size of the text lines is greater than or equal to 3KB, write the lines to the current file, close it, and open a new one
+            if text_size >= 4096:
+                output_file.writelines(text_lines)
+                output_file.close()
+                text_lines = []
+                file_count += 1
+                output_file = open(f'translate{file_count}.txt', 'w')
+
             text_lines.append(line)
             write_text = True
         # If the line contains '-->', set write_text to False
         elif '-->' in stripped_line:
-            write_text = True  # Change this line
+            write_text = True
         # If write_text is True and the line is not empty, add it to text_lines
         elif write_text and stripped_line != '':
             text_lines.append(line)
             text_lines.append('\n')  # Add an empty line after each line of text
-
-        # Calculate the size of the text lines
-        text_size = sum(len(text) for text in text_lines)
-
-        # If the size of the text lines is greater than or equal to 3KB, write the lines to the current file, close it, and open a new one
-        if text_size >= 4096:
-            output_file.writelines(text_lines)
-            output_file.close()
-            text_lines = []
-            file_count += 1
-            output_file = open(f'translate{file_count}.txt', 'w')
-
 
     # Write any remaining text lines to the last output file
     if text_lines:
