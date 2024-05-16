@@ -7,15 +7,20 @@ def parse_srt(srt_file):
         lines = f.readlines()
 
     # Initialize variables
-    file_count = 1
+    file_count = 0
     output_file = open(f'translate{file_count}.txt', 'w')
     text_lines = []
     write_text = False
 
+    # New variables for aggregation
+    current_text = None
+    current_start_time = None
+    current_end_time = None
+
     # Iterate over each line in the srt file
     for line in lines:
         stripped_line = line.strip()
-        
+
         # If the line is a number, add it to text_lines and set write_text to True
         if stripped_line.isdigit():
             # Calculate the size of the text lines
@@ -29,15 +34,29 @@ def parse_srt(srt_file):
                 file_count += 1
                 output_file = open(f'translate{file_count}.txt', 'w')
 
-            text_lines.append(line)
             write_text = True
         # If the line contains '-->', set write_text to False
         elif '-->' in stripped_line:
+            times = stripped_line.split(' --> ')
+            if current_text is not None:
+                current_end_time = times[1]
+            else:
+                current_start_time = times[0]
+                current_end_time = times[1]
             write_text = True
         # If write_text is True and the line is not empty, add it to text_lines
         elif write_text and stripped_line != '':
-            text_lines.append(line)
-            text_lines.append('\n')  # Add an empty line after each line of text
+            if current_text is None:
+                current_text = stripped_line
+            elif current_text != stripped_line:
+                # If the current text is different from the previous text, write the previous text and its time interval to the text_lines
+                text_lines.append(f'{current_start_time} --> {current_end_time}\n')
+                text_lines.append(f'{current_text}\n\n')
+                current_text = stripped_line
+                current_start_time = current_end_time
+            else:
+                # If the current text is the same as the previous text, do not append it to text_lines
+                continue
 
     # Write any remaining text lines to the last output file
     if text_lines:
