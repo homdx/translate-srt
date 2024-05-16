@@ -7,8 +7,9 @@ def parse_srt(srt_file):
         lines = f.readlines()
 
     # Initialize variables
-    file_count = 0
-    output_file = open(f'translate{file_count}.txt', 'w')
+    file_count = 0  # Start from 0
+    output_file = None
+    combined_output_file = open(f'{os.path.splitext(srt_file)[0]}-combined.srt', 'w')  # New combined output file
     text_lines = []
     write_text = False
 
@@ -28,11 +29,13 @@ def parse_srt(srt_file):
 
             # If the size of the text lines is greater than or equal to 3KB, write the lines to the current file, close it, and open a new one
             if text_size >= 4096:
-                output_file.writelines(text_lines)
-                output_file.close()
+                if output_file:
+                    output_file.writelines(text_lines)
+                    output_file.close()
+                combined_output_file.writelines(text_lines)  # Write to the combined output file here
                 text_lines = []
                 file_count += 1
-                output_file = open(f'translate{file_count}.txt', 'w')
+                output_file = open(f'translate{file_count:02}.txt', 'w')  # Add a zero before the file count if it's less than 10
 
             write_text = True
         # If the line contains '-->', set write_text to False
@@ -60,10 +63,13 @@ def parse_srt(srt_file):
 
     # Write any remaining text lines to the last output file
     if text_lines:
-        output_file.writelines(text_lines)
+        if output_file:
+            output_file.writelines(text_lines)
+            output_file.close()
+        combined_output_file.writelines(text_lines)  # Write to the combined output file
 
     # Close the last output file
-    output_file.close()
+    combined_output_file.close()  # Close the combined output file
 
 # Create the parser
 parser = argparse.ArgumentParser(description="Parse an SRT file")
